@@ -2,10 +2,12 @@
 
 const selectAnios = document.getElementById('anio')
 const formulario = document.getElementById('cotizar-seguro')
+
+// generar opciones del select
 const max = new Date().getFullYear()
 const min = max - 20
 
-// generar opciones del select
+
 for (let i = max; i >= min; i--) {
     let option = document.createElement('option')
     option.value = i
@@ -14,129 +16,136 @@ for (let i = max; i >= min; i--) {
 }
 
 
-// constructor para seguro
-function Seguro(marca, ano, tipo) {
+class Seguro {
 
-    this.marca = marca
-    this.ano = ano
-    this.tipo = tipo
+    constructor(marca, ano, tipo) {
 
-}
+        this.marca = marca
+        this.ano = ano
+        this.tipo = tipo
 
-Seguro.prototype.cotizarSeguro = function() {
+    }
 
-    /*  
-          1 = americano 1.15
-          2 = asiatico 1.05
-          3 = europeo 1.35
-    */
-    let cantidad;
-    const base = 2000
+    cotizarSeguro() {
 
-    switch (this.marca) {
-        case '1':
-            cantidad = base * 1.15
-            break;
-        case '2':
-            cantidad = base * 1.05
-            break;
-        case '3':
-            cantidad = base * 1.35
-            break;
+        /*  
+              1 = americano 1.15
+              2 = asiatico 1.05
+              3 = europeo 1.35
+        */
+        let cantidad;
+        const base = 2000
+
+        switch (this.marca) {
+            case '1':
+                cantidad = base * 1.15
+                break;
+            case '2':
+                cantidad = base * 1.05
+                break;
+            case '3':
+                cantidad = base * 1.35
+                break;
+
+
+        }
+
+        // Leer el a;o
+        // cada anio el seguro baja un 3%
+
+
+        const diferencia = new Date().getFullYear() - this.ano
+
+        cantidad -= ((diferencia * 3) * cantidad) / 100
+
+
+
+        /* 
+      
+      si el seguro es basico aumenta un 30% mas
+      Si es uno completo aumenta un 50% mas
+  
+      */
+
+        if (this.tipo === 'basico') {
+            cantidad *= 1.30
+        } else {
+            cantidad *= 1.50
+        }
+
+
+        return cantidad
+
 
 
     }
 
-    // Leer el a;o
-    // cada anio el seguro baja un 3%
-
-
-    const diferencia = new Date().getFullYear() - this.ano
-
-    cantidad -= ((diferencia * 3) * cantidad) / 100
-
-
-
-    /* 
-    
-    si el seguro es basico aumenta un 30% mas
-    Si es uno completo aumenta un 50% mas
-
-    */
-
-    if (this.tipo === 'basico') {
-        cantidad *= 1.30
-    } else {
-        cantidad *= 1.50
-    }
-
-
-    return cantidad
-
-
 
 }
 
-// Todo de la interfaz
 
-function Interfaz() {}
 
-// imprime el resultado de la cotizacion 
+class Interfaz {
+    constructor() {}
 
-Interfaz.prototype.mostrarResultado = function(seguro, total) {
-    const resultado = document.getElementById('resultado')
-    let marca;
-    switch (seguro.marca) {
-        case '1':
-            marca = 'americano'
-            break;
-        case '2':
-            marca = 'asiatico'
-            break;
-        case '3':
-            marca = 'europeo'
-            break;
+    mostrarResultado(seguro, total) {
+
+        const resultado = document.getElementById('resultado')
+        let marca;
+
+        switch (seguro.marca) {
+            case '1':
+                marca = 'americano'
+                break;
+            case '2':
+                marca = 'asiatico'
+                break;
+            case '3':
+                marca = 'europeo'
+                break;
+        }
+
+        const div = document.createElement('div')
+
+        div.innerHTML = `<p class='header'>Tu resumen:</p>
+     <p> Marca: ${marca}</p>
+      <p>Año: ${seguro.ano}</p>
+      <p>Tipo: ${seguro.tipo}</p>
+      <p>Total: ${total}</p>
+      `
+
+        const spinner = document.querySelector('#cargando img')
+        spinner.style.display = 'block'
+
+        setTimeout(function() {
+            spinner.style.display = 'none'
+            resultado.appendChild(div)
+        }, 3000)
+
     }
-    // crear div
 
-    const div = document.createElement('div')
-        //agregar informacion
 
-    div.innerHTML = `<p class='header'>Tu resumen:</p>
-   <p> Marca: ${marca}</p>
-    <p>Año: ${seguro.ano}</p>
-    <p>Tipo: ${seguro.tipo}</p>
-    <p>Total: ${total}</p>
-    `
+    mostrarMensaje(mensaje, tipo) {
+        const div = document.createElement('div')
 
-    const spinner = document.querySelector('#cargando img')
-    spinner.style.display = 'block'
-    setTimeout(function() {
-        spinner.style.display = 'none'
-        resultado.appendChild(div)
-    }, 3000)
+        if (tipo === 'error') {
+
+            div.classList.add('mensaje', 'error')
+
+        } else {
+            div.classList.add('mensaje', 'correcto')
+        }
+
+        div.innerHTML = `${mensaje}`
+        formulario.insertBefore(div, document.querySelector('.form-group'))
+
+        setTimeout(function() {
+            document.querySelector('.mensaje').remove()
+        }, 3000)
+    }
 
 }
 
-// mensaje que se imprime en el html 
-
-Interfaz.prototype.mostrarMensaje = function(mensaje, tipo) {
-    const div = document.createElement('div')
-
-    if (tipo === 'error') {
-
-        div.classList.add('mensaje', 'error')
-
-    } else {
-        div.classList.add('mensaje', 'correcto')
-    }
-    div.innerHTML = `${mensaje}`
-    formulario.insertBefore(div, document.querySelector('.form-group'))
-
-    setTimeout(function() {
-        document.querySelector('.mensaje').remove()
-    }, 3000)
-}
 
 // Event listener 
 
